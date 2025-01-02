@@ -1,3 +1,6 @@
+using BookComic.Models;
+using Microsoft.EntityFrameworkCore;
+
 namespace BookComic
 {
     public class Program
@@ -5,9 +8,13 @@ namespace BookComic
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddDbContext<BookComicContext>(options =>
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+            });
 
             // Add services to the container.
-            builder.Services.AddControllersWithViews();
+            builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
 
             var app = builder.Build();
 
@@ -25,6 +32,10 @@ namespace BookComic
             app.UseAuthorization();
 
             app.MapStaticAssets();
+            app.MapControllerRoute(
+                name: "areas",
+                pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}")
+                .WithStaticAssets();
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}")
